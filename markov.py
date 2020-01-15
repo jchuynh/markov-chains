@@ -12,9 +12,9 @@ def open_and_read_file(file_path):
     """
 
     # your code goes here
-    with open(file_path, 'r') as f:
-        text = f.read().replace("\n", " ").rstrip()
-    
+    with open(file_path, 'r') as f: # 'r' = read-only
+        text = f.read().replace("\n", " ") # read the open file then replace the new-line breaks with whitespaces. 
+     
     return text
 
 
@@ -52,8 +52,10 @@ def make_chains(text_string):
     for w1, w2, w3 in zip(words[:-2], words[1:-1], words[2:]):
         bi_gram = (w1, w2)
         chains[bi_gram].append(w3) # if the bigram doesn't exit in the keys, append w3
-
-    print(chains)
+        # if bi_gram in chains:
+        #   chains[bi_gram].append(w3)
+        # else:
+        #   chains[bi_gram] = [w3]
 
     return chains
 
@@ -74,7 +76,6 @@ def make_text(chains):
                 return " ".join(words)
             next_word = choice(possible_next_words)
             words.append(next_word)
-
 
 
 input_path = "green-eggs.txt"
