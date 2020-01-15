@@ -5,21 +5,26 @@ from random import choice
 from collections import defaultdict
 
 
-def open_and_read_file(file_path):
+def open_and_read_file(*args):
     """Take file path as string; return text as string.
 
     Takes a string that is a file path, opens the file, and turns
     the file's contents as one string of text.
     """
+    full_text = []
 
-    # your code goes here
-    with open(file_path, 'r') as f: # 'r' = read-only
-        text = f.read().replace("\n", " ") # read the open file then replace the new-line breaks with whitespaces. 
+    for file_path in args[0]:
+        # 'r' = read-only
+        with open(file_path, 'r') as f:
+            # read the open file then replace the new-line breaks with
+            # whitespaces.
+            text = f.read().replace("\n", " ")
+        full_text.append(text)
 
-    return text
+    return full_text
 
 
-def make_chains(text_string, n=2):
+def make_chains(all_text_strings, n):
     """Take input text as string; return dictionary of Markov chains.
 
     A chain will be a key that consists of a tuple of (word1, word2)
@@ -44,37 +49,43 @@ def make_chains(text_string, n=2):
         [None]
     """
 
+    n = int(n)
+
     chains = defaultdict(lambda: [], {}) # with an empty dictionary, we take the list as the default
     # if the key is not in the dictionary, the default is an empty list
 
-    # your code goes here
-    words = text_string.split() # split by whitespace 
+    for text_string in all_text_strings:
+        words = text_string.split() # split by whitespace 
 
-    # for w1, w2, w3 in zip(words[:-2], words[1:-1], words[2:]):
-    #     bi_gram = (w1, w2)
-    #     chains[bi_gram].append(w3) # if the bigram doesn't exit in the keys, append w3
-        # if bi_gram in chains:
-        #   chains[bi_gram].append(w3)
-        # else:
-        #   chains[bi_gram] = [w3]
+        # for w1, w2, w3 in zip(words[:-2], words[1:-1], words[2:]):
+        #     bi_gram = (w1, w2)
+        #     chains[bi_gram].append(w3) # if the bigram doesn't exit in the keys, append w3
+            # if bi_gram in chains:
+            #   chains[bi_gram].append(w3)
+            # else:
+            #   chains[bi_gram] = [w3]
 
-    for i in range(len(words)-n):
-        n_gram = tuple(words[i:(i+n)])
-        value_for_n_gram = words[i+n]
-        chains[n_gram].append(value_for_n_gram)
+        for i in range(len(words)-n):
+            n_gram = tuple(words[i:(i+n)])
+            value_for_n_gram = words[i+n]
+            chains[n_gram].append(value_for_n_gram)
 
     return chains
 
 
-def make_text(chains, n=2):
+def make_text(chains, end_points=set(['.', '!', '?'])):
     """Return text from chains."""
 
     words = []
+    n = len(list(chains.keys())[0])
 
     # your code goes here
     while True:
         if not words:
-            start_bigram = choice(list(chains.keys()))
+            while True:
+                start_bigram = choice(list(chains.keys()))
+                if start_bigram[0][0].isupper():
+                    break
             words.extend(list(start_bigram))
         else:
             possible_next_words = chains[tuple(words[-n:])]
@@ -82,19 +93,19 @@ def make_text(chains, n=2):
                 return " ".join(words)
             next_word = choice(possible_next_words)
             words.append(next_word)
+            if next_word[-1] in end_points:
+                return " ".join(words)
 
 
 #input_path = "green-eggs.txt"
 
-n = 6
-
 # Open the file and turn it into one long string
-input_text = open_and_read_file(sys.argv[1])
+input_text = open_and_read_file(sys.argv[1:-1])
 
 # Get a Markov chain
-chains = make_chains(input_text, n=n)
+chains = make_chains(input_text, sys.argv[-1]) # user enters n value
 
 # Produce random text
-random_text = make_text(chains, n=n)
+random_text = make_text(chains)
 
 print(random_text)
