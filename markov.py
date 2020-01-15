@@ -1,6 +1,7 @@
 """Generate Markov text from text files."""
 
 from random import choice
+from collections import defaultdict
 
 
 def open_and_read_file(file_path):
@@ -11,8 +12,10 @@ def open_and_read_file(file_path):
     """
 
     # your code goes here
-
-    return "Contents of your file as one long string"
+    with open(file_path, 'r') as f:
+        text = f.read().replace("\n", " ").rstrip()
+    
+    return text
 
 
 def make_chains(text_string):
@@ -40,9 +43,17 @@ def make_chains(text_string):
         [None]
     """
 
-    chains = {}
+    chains = defaultdict(lambda: [], {}) # with an empty dictionary, we take the list as the default
+    # if the key is not in the dictionary, the default is an empty list
 
     # your code goes here
+    words = text_string.split() # split by whitespace 
+
+    for w1, w2, w3 in zip(words[:-2], words[1:-1], words[2:]):
+        bi_gram = (w1, w2)
+        chains[bi_gram].append(w3) # if the bigram doesn't exit in the keys, append w3
+
+    print(chains)
 
     return chains
 
@@ -53,8 +64,17 @@ def make_text(chains):
     words = []
 
     # your code goes here
+    while True:
+        if not words:
+            start_bigram = choice(list(chains.keys()))
+            words.extend(list(start_bigram))
+        else:
+            possible_next_words = chains[(words[-2], words[-1])]
+            if not possible_next_words:
+                return " ".join(words)
+            next_word = choice(possible_next_words)
+            words.append(next_word)
 
-    return " ".join(words)
 
 
 input_path = "green-eggs.txt"
